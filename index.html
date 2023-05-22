@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+        }
+        #map {
+            position: absolute;
+            top: 50px; /* height of the top bar */
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+        #top-bar {
+            height: 50px;
+            width: 100%;
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+            box-sizing: border-box;
+        }
+        </style>
+        <title></title>
+    </head>
+    <body>
+        <div id="top-bar">
+            <!-- You can put your names and logos here -->
+            <span>Demo Drone2Sat</span>
+            <img src="data/logo.jpeg" alt="Logo" height="30px">
+        </div>
+        <div id="map"></div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-side-by-side.js"></script>
+        <script>
+        var map = L.map('map', {
+            zoomControl:true, maxZoom:28, minZoom:15,zoom: 17
+        }).fitBounds([[52.63831745768137,13.673143664784734],[52.660972102762216,13.730292477682621]]);
+        var Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+        });
+
+        googleSat = L.tileLayer('http://{s}.google.com/vt?lyrs=s&x={x}&y={y}&z={z}',{
+            maxZoom: 20,
+            subdomains:['mt0','mt1','mt2','mt3']
+        }).addTo(map);
+        var osmLayer = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+        });
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('Termatics© <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot');       
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        map.createPane('left');
+        map.getPane('left').style.zIndex = 400;
+        var img_Clippedextent_0 = 'data/tep_rec_1.png';
+        var img_bounds_test_rec_0 = [[52.64142066575127,13.680675977899165],[52.65799218575267,13.709059303595025]];
+
+        var layer_Clippedextent_0 = new L.imageOverlay(img_Clippedextent_0,
+                                               img_bounds_test_rec_0,
+                                              {pane: 'left',
+                                              opacity: 0.7});
+        bounds_group.addLayer(layer_Clippedextent_0);
+        map.addLayer(layer_Clippedextent_0);
+
+        map.createPane('right');
+        map.getPane('right').style.zIndex = 400;
+        var img_Clippedextent_1 = 'data/test_1_0.png';
+        var img_bounds_tep_rec_1 = [[52.64142701070858,13.680659727667582],[52.65799487764036,13.709046490645758]];
+
+        var layer_Clippedextent_1 = new L.imageOverlay(img_Clippedextent_1,
+                                                img_bounds_tep_rec_1,
+                                              {pane: 'right',
+                                              opacity: 0.7});
+        bounds_group.addLayer(layer_Clippedextent_1);
+        map.addLayer(layer_Clippedextent_1);
+        setBounds();
+
+        L.control.sideBySide(layer_Clippedextent_0, layer_Clippedextent_1).addTo(map);
+        map.on('mousedown', function(e) {
+            if (e.originalEvent.target.className === 'leaflet-control-side-by-side-divider') {
+                e.originalEvent.preventDefault();
+            }
+        });
+        
+        map.on('mouseup', function() {
+            map.dragging.enable();
+        });
+        
+        map.on('mousemove', function(e) {
+            if (e.originalEvent.target.className === 'leaflet-control-side-by-side-divider') {
+                map.dragging.disable();
+            } else {
+                map.dragging.enable();
+            }
+        });
+
+        L.ImageOverlay.include({
+            getBounds: function () {
+                return this._bounds;
+            }
+        });
+
+        var baseLayers = {
+            "Esri World Imagery": Esri_WorldImagery,
+            "OSM": osmLayer,
+            "Google":googleSat
+        };
+        var overlayLayers = {
+            "Clippedextent 0": layer_Clippedextent_0,
+            "Clippedextent 1": layer_Clippedextent_1
+        };
+
+
+        L.control.layers(baseLayers,overlayLayers).addTo(map);
+        </script>
+    </body>
+</html>
